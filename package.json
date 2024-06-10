@@ -13,8 +13,11 @@
     "seed": "node ./scripts/seedDb.js"
   },
   "devDependencies": {
+    "chai": "^5.1.1",
     "concurrently": "^8.0.1",
-    "nodemon": "^2.0.22"
+    "mocha": "^10.4.0",
+    "nodemon": "^2.0.22",
+    "sinon": "^18.0.0"
   },
   "engines": {
     "node": ">=10.16.3"
