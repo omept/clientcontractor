@@ -43,7 +43,7 @@ class ContractRepository {
                     { ContractorId: config.profileId }
                 ],
                 status: {
-                    [Op.ne]: Status.TERMINATED
+                    [Op.not]: Status.TERMINATED
                 }
             },
             offset, // Offset for pagination
@@ -78,7 +78,7 @@ class ContractRepository {
                         { ContractorId: config.profileId }
                     ],
                     status: {
-                        [Op.ne]: Status.TERMINATED
+                        [Op.not]: Status.TERMINATED
                     },
                 },
             },
@@ -175,14 +175,79 @@ class ContractRepository {
 
             // Commit the transaction
             await transaction.commit();
-            contractor = await contractor.reload();
-            client = await client.reload();
             return true;
 
         } catch (error) {
             // Roll back the transaction if any operation fails
             await transaction.rollback();
             console.error('Failed to pay:', error);
+            return false;
+        }
+
+    }
+
+    async deposite(options) {
+        let config = {
+            userId: options.userId ?? null,
+            profileId: options.profileId ?? null,
+            amount: options.amount ?? 0,
+            profile: options.profile ?? null,
+        };
+
+        if (config.userId != config.profileId) {
+            console.log('userId and profileId mismatch');
+            return false;
+        }
+
+        if (config.amount <= 0) {
+            return true;
+        }
+
+
+        // total jobs to pay
+        let jobsAmountToPay = await Job.sum("price", {
+            where: {
+                paid: {
+                    [Op.not]: true
+                },
+            },
+            include: {
+                model: Contract,
+                where: {
+                    ClientId: config.profileId
+                },
+                status: {
+                    [Op.not]: Status.TERMINATED
+                },
+
+            }
+        });
+
+        const perct25 = jobsAmountToPay * 0.25;
+        if (config.amount > perct25) {
+            console.log("A client can\'t deposit more than 25% his total of jobs to pay. (at the deposit moment)");
+            return false;
+        }
+
+        // perform debit and set job to paid
+        const transaction = await sequelize.transaction();
+        try {
+            // top up client
+            await Profile.update({ balance: config.profile.balance + config.amount },
+                {
+                    where: {
+                        id: config.profileId,
+                    }, transaction
+                });
+
+            // Commit the transaction
+            await transaction.commit();
+            return true;
+
+        } catch (error) {
+            // Roll back the transaction if any operation fails
+            await transaction.rollback();
+            console.error('Failed to top up:', error);
             return false;
         }
 

@@ -47,14 +47,28 @@ app.get('/jobs/unpaid', getProfile, async (req, res) => {
 })
 
 /**
- * @returns jobs
+ * @returns object
  */
 app.post('/jobs/:job_id/pay', getProfile, async (req, res) => {
     const option = {
-        profileId: req.query.profile_id,
+        profileId: req.query.profile_id ?? req.body.profile_id,
         jobId: req.params.job_id,
     };
     let successful = await (new ContractRepository()).payJob(option);
+    res.json({ payment: successful ? "successful" : "unsuccessful" });
+
+})
+/**
+ * @returns object
+ */
+app.post('/balances/deposit/:userId', getProfile, async (req, res) => {
+    const option = {
+        profileId: req.query.profile_id ?? req.body.profile_id,
+        amount: req.query.amount ?? req.body.amount,
+        userId: req.params.userId,
+        profile: req.profile,
+    };
+    let successful = await (new ContractRepository()).deposite(option);
     res.json({ payment: successful ? "successful" : "unsuccessful" });
 
 })

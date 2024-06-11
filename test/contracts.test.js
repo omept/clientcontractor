@@ -75,11 +75,30 @@ describe('API tests', () => {
     });
 
     let oldBal = client.balance;
-    const res = await request(app).post(`/jobs/1/pay?profile_id=${profileId}`);
+    const res = await request(app).post(`/jobs/1/pay`).send({ profile_id: profileId });
     let newClient = await client.reload();
     expect(res.statusCode).toEqual(200);
     expect(res.body.payment).toEqual("successful");
     expect(oldBal - job.price).toEqual(newClient.balance);
+  });
+
+  it('POST /balances/deposit/:userId -  Deposits money into the balance of a client, a client can\'t deposit more than 25% his total of jobs to pay. (at the deposit moment)', async () => {
+    const profileId = 1;
+    let client = await Profile.findOne({
+      where: {
+        id: profileId,
+        type: "client"
+      }
+    });
+    const topUp = 30;
+    const oldBal = client.balance;
+    const res = await request(app)
+      .post("/balances/deposit/1")
+      .send({ amount: topUp, profile_id: profileId });
+    client = await client.reload();
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.payment).toEqual("successful");
+    expect(client.balance).toEqual(oldBal + topUp);
   });
 
 });
