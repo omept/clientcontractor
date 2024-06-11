@@ -32,17 +32,30 @@ app.get('/contracts/', getProfile, async (req, res) => {
     let contracts = await (new ContractRepository()).fetchContracts(option);
     res.json(contracts);
 
-})
+});
 
 /**
- * @returns contracts
+ * @returns jobs
  */
 app.get('/jobs/unpaid', getProfile, async (req, res) => {
     const option = {
         profileId: req.query.profile_id
     };
-    let contracts = await (new ContractRepository()).fetchUnpaid(option);
+    let contracts = await (new ContractRepository()).fetchUnpaidJobs(option);
     res.json(contracts);
+
+})
+
+/**
+ * @returns jobs
+ */
+app.post('/jobs/:job_id/pay', getProfile, async (req, res) => {
+    const option = {
+        profileId: req.query.profile_id,
+        jobId: req.params.job_id,
+    };
+    let successful = await (new ContractRepository()).payJob(option);
+    res.json({ payment: successful ? "successful" : "unsuccessful" });
 
 })
 module.exports = app;

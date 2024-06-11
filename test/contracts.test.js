@@ -1,14 +1,20 @@
 const request = require('supertest');
 const app = require('../src/app');
+const Seeder = require('./dbUtil');
 const ContractRepository = require('../src/services/contractRepository');
+const { Profile, Job } = require('../src/model');
+
+afterAll(async () => {
+  await Seeder();
+});
 
 
 describe('API tests', () => {
   it('GET /contracts/:id should return the contract only if it belongs to the profile calling', async () => {
     let profileId = 1;
     const res = await request(app).get(`/contracts/2?profile_id=${profileId}`);
-    let contractorId = res.body.ContractorId
-    let clientId = res.body.ClientId
+    let contractorId = res.body.ContractorId;
+    let clientId = res.body.ClientId;
     expect(res.statusCode).toEqual(200);
     expect(true).toEqual([contractorId, clientId].includes(profileId));
   });
@@ -44,14 +50,41 @@ describe('API tests', () => {
       let clientIds = [];
       isTerminated = true;
       body.forEach(ele => {
-        isTerminated = ele.status == terminated;
-        clientIds.push(ele.ClientId);
-        contractorIds.push(ele.ContractorId);
+        isTerminated = ele.Contract.status == terminated;
+        clientIds.push(ele.Contract.ClientId);
+        contractorIds.push(ele.Contract.ContractorId);
       });
-      expect(isTerminated).toEqual(false); // active jobs are non-terminated jobs
+      expect(isTerminated).toEqual(false); // active jobs are non-terminated contracts
       expect(true).toEqual([...contractorIds, ...clientIds].includes(profileId));
     }
   });
+
+  it('POST /jobs/:job_id/pay -  Pay for a job, a client can only pay if his balance >= the amount to pay. The amount should be moved from the client\'s balance to the contractor balance', async () => {
+    let profileId = 1;
+    let jobId = 1;
+    let client = await Profile.findOne({
+      where: {
+        id: profileId,
+        type: "client"
+      }
+    });
+    let job = await Job.findOne({
+      where: {
+        id: jobId
+      }
+    });
+
+    let oldBal = client.balance;
+    client = await client.reload();
+    const res = await request(app).post(`/jobs/1/pay?profile_id=${profileId}`);
+    console.log({ oldBal, newBal: client.balance });
+
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.payment).toEqual("successful");
+    expect(oldBal - job.price).toEqual(client.balance);
+  });
+
 });
 
 describe('Contractor unit tests', () => {
