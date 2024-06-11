@@ -4,7 +4,7 @@ const Seeder = require('./dbUtil');
 const ContractRepository = require('../src/services/contractRepository');
 const { Profile, Job } = require('../src/model');
 
-afterAll(async () => {
+beforeAll(async () => {
   await Seeder();
 });
 
