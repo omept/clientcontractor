@@ -15,17 +15,22 @@ describe('API tests', () => {
 
   it('GET /contracts - Returns a list of contracts belonging to a user (client or contractor), the list should only contain non terminated contracts.', async () => {
     let terminated = "terminated";
-    const res = await request(app).get("/contracts");
+    let profileId = 1;
+    const res = await request(app).get(`/contracts?profile_id=${profileId}`);
     expect(res.statusCode).toEqual(200);
     const body = res.body;
     if (body.length > 0) {
-      isTerminated = false;
+      let contractorIds = [];
+      let clientIds = [];
+      isTerminated = true;
       body.forEach(ele => {
         isTerminated = ele.status == terminated;
+        clientIds.push(ele.ClientId);
+        contractorIds.push(ele.ContractorId);
       });
-      expect(true).toEqual(false);
+      expect(isTerminated).toEqual(false);
+      expect(true).toEqual([...contractorIds, ...clientIds].includes(profileId));
     }
-
   });
 });
 

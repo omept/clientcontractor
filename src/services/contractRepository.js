@@ -26,7 +26,6 @@ class ContractRepository {
     async fetchContracts(options) {
         let config = {
             profileId: options.profileId ?? null,
-            status: [Status.NEW, Status.IN_PROGRESS, Status.TERMINATED].includes(options.status) ? options.status : Status.NEW,
             page: options.page ?? 1,
             limit: options.limit ?? 10,
         };
@@ -42,12 +41,17 @@ class ContractRepository {
                 [Op.or]: [
                     { ClientId: config.profileId },
                     { ContractorId: config.profileId }
-                ]
+                ],
+                status: {
+                    [Op.ne]: Status.TERMINATED
+                }
             },
             offset, // Offset for pagination
             limit: pageSize // Limit for pagination
         });
-
+        if (contracts.length <= 0) {
+            return [];
+        }
         contracts = contracts.map(contract => contract.dataValues);
         return contracts;
     }

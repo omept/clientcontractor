@@ -21,4 +21,15 @@ app.get('/contracts/:id', getProfile, async (req, res) => {
     res.json(contract);
 
 })
+/**
+ * @returns contract by id
+ */
+app.get('/contracts/', getProfile, async (req, res) => {
+    const option = {
+        profileId: req.query.profile_id
+    };
+    let contracts = await (new ContractRepository()).fetchContracts(option);
+    res.json(contracts);
+
+})
 module.exports = app;
