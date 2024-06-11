@@ -109,7 +109,7 @@ class ContractRepository {
                     ClientId: config.profileId
                 },
                 status: {
-                    [Op.ne]: Status.TERMINATED
+                    [Op.not]: Status.TERMINATED
                 },
                 include: [
                     {
@@ -255,4 +255,4 @@ class ContractRepository {
 
 }
 
-module.exports = ContractRepository;
+module.exports = { ContractRepository, ContractStatus: Status };

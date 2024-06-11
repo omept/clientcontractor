@@ -3,7 +3,7 @@ const Sequelize = require('sequelize');
 const sequelize = new Sequelize({
   dialect: 'sqlite',
   storage: './database.sqlite3',
-  logging: false,
+  logging: true,
 });
 
 class Profile extends Sequelize.Model { }

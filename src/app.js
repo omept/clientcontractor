@@ -2,7 +2,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const { sequelize } = require('./model')
 const { getProfile } = require('./middleware/getProfile')
-const ContractRepository = require('./services/contractRepository')
+const { validateDate } = require('./utils/validateDate')
+const { ContractRepository } = require('./services/contractRepository')
+const AdminRepository = require('./services/adminRepository')
 const app = express();
 app.use(bodyParser.json());
 app.set('sequelize', sequelize)
@@ -58,6 +60,7 @@ app.post('/jobs/:job_id/pay', getProfile, async (req, res) => {
     res.json({ payment: successful ? "successful" : "unsuccessful" });
 
 })
+
 /**
  * @returns object
  */
@@ -70,6 +73,29 @@ app.post('/balances/deposit/:userId', getProfile, async (req, res) => {
     };
     let successful = await (new ContractRepository()).deposite(option);
     res.json({ payment: successful ? "successful" : "unsuccessful" });
+
+})
+
+/**
+ * @returns object
+ */
+app.get('/admin/best-profession', async (req, res) => {
+    // validate start and end date
+    const startDate = req.query.start;
+    const endDate = req.query.end;
+
+    if (!validateDate(startDate) || !validateDate(endDate)) {
+        console.log("invalid start or end date", { startDate, endDate });
+        return res.status(401).end();
+    }
+
+    const option = {
+        startDate,
+        endDate
+    };
+
+
+    res.json(await (new AdminRepository()).bestProfession(option));
 
 })
 module.exports = app;

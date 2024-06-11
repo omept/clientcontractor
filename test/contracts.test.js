@@ -1,7 +1,7 @@
 const request = require('supertest');
 const app = require('../src/app');
 const Seeder = require('./dbUtil');
-const ContractRepository = require('../src/services/contractRepository');
+const { ContractRepository } = require('../src/services/contractRepository');
 const { Profile, Job } = require('../src/model');
 
 beforeAll(async () => {
@@ -9,7 +9,7 @@ beforeAll(async () => {
 });
 
 
-describe('API tests', () => {
+describe('Contracts API tests', () => {
   it('GET /contracts/:id should return the contract only if it belongs to the profile calling', async () => {
     let profileId = 1;
     const res = await request(app).get(`/contracts/2?profile_id=${profileId}`);
