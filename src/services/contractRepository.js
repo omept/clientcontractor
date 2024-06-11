@@ -175,6 +175,8 @@ class ContractRepository {
 
             // Commit the transaction
             await transaction.commit();
+            contractor = await contractor.reload();
+            client = await client.reload();
             return true;
 
         } catch (error) {

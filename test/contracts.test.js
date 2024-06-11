@@ -75,14 +75,11 @@ describe('API tests', () => {
     });
 
     let oldBal = client.balance;
-    client = await client.reload();
     const res = await request(app).post(`/jobs/1/pay?profile_id=${profileId}`);
-    console.log({ oldBal, newBal: client.balance });
-
-
+    let newClient = await client.reload();
     expect(res.statusCode).toEqual(200);
     expect(res.body.payment).toEqual("successful");
-    expect(oldBal - job.price).toEqual(client.balance);
+    expect(oldBal - job.price).toEqual(newClient.balance);
   });
 
 });
