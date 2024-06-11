@@ -21,14 +21,27 @@ app.get('/contracts/:id', getProfile, async (req, res) => {
     res.json(contract);
 
 })
+
 /**
- * @returns contract by id
+ * @returns contracts
  */
 app.get('/contracts/', getProfile, async (req, res) => {
     const option = {
         profileId: req.query.profile_id
     };
     let contracts = await (new ContractRepository()).fetchContracts(option);
+    res.json(contracts);
+
+})
+
+/**
+ * @returns contracts
+ */
+app.get('/jobs/unpaid', getProfile, async (req, res) => {
+    const option = {
+        profileId: req.query.profile_id
+    };
+    let contracts = await (new ContractRepository()).fetchUnpaid(option);
     res.json(contracts);
 
 })

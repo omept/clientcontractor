@@ -32,6 +32,26 @@ describe('API tests', () => {
       expect(true).toEqual([...contractorIds, ...clientIds].includes(profileId));
     }
   });
+
+  it('GET /jobs/unpaid - Get all unpaid jobs for a user (either a client or contractor), for active contracts only.', async () => {
+    let terminated = "terminated";
+    let profileId = 1;
+    const res = await request(app).get(`/jobs/unpaid?profile_id=${profileId}`);
+    expect(res.statusCode).toEqual(200);
+    const body = res.body;
+    if (body.length > 0) {
+      let contractorIds = [];
+      let clientIds = [];
+      isTerminated = true;
+      body.forEach(ele => {
+        isTerminated = ele.status == terminated;
+        clientIds.push(ele.ClientId);
+        contractorIds.push(ele.ContractorId);
+      });
+      expect(isTerminated).toEqual(false); // active jobs are non-terminated jobs
+      expect(true).toEqual([...contractorIds, ...clientIds].includes(profileId));
+    }
+  });
 });
 
 describe('Contractor unit tests', () => {
