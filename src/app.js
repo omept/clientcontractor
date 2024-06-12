@@ -81,8 +81,8 @@ app.post('/balances/deposit/:userId', getProfile, async (req, res) => {
  */
 app.get('/admin/best-profession', async (req, res) => {
     // validate start and end date
-    const startDate = req.query.start;
-    const endDate = req.query.end;
+    const startDate = req.query.start ?? "2010-01-13";
+    const endDate = req.query.end ?? "2030-01-13";
 
     if (!validateDate(startDate) || !validateDate(endDate)) {
         console.log("invalid start or end date", { startDate, endDate });
@@ -93,9 +93,28 @@ app.get('/admin/best-profession', async (req, res) => {
         startDate,
         endDate
     };
-
-
     res.json(await (new AdminRepository()).bestProfession(option));
+})
 
+/**
+ * @returns object
+ */
+app.get('/admin/best-clients', async (req, res) => {
+    // validate start and end date
+    const startDate = req.query.start ?? "2010-01-13";
+    const endDate = req.query.end ?? "2030-01-13";
+    const limit = req.query.limit ?? 1;
+
+    if (!validateDate(startDate) || !validateDate(endDate)) {
+        console.log("invalid start or end date", { startDate, endDate });
+        return res.status(401).end();
+    }
+
+    const option = {
+        startDate,
+        endDate,
+        limit
+    };
+    res.json(await (new AdminRepository()).bestClients(option));
 })
 module.exports = app;
